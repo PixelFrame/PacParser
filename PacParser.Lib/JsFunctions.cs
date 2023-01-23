@@ -191,27 +191,50 @@ namespace PacParser.Lib
 
         public bool weekdayRange(string wd1, string wd2, string gmt)
         {
+            bool result;
             if (wd2 == "GMT")
             {
                 var weekOfTodayGmt = DateTime.UtcNow.DayOfWeek;
-                return weekOfTodayGmt == Helper.DayOfWeekFromString(wd1);
+                result = weekOfTodayGmt == Helper.DayOfWeekFromString(wd1);
+                debugOutput.AppendLine($"[INFO] weekdayRange(wd1:{wd1}, gmt: GMT) => {result}");
+                return result;
             }
 
             var d1 = Helper.DayOfWeekFromString(wd1);
             var d2 = Helper.DayOfWeekFromString(wd2);
-            var weekOfToday = DateTime.UtcNow.DayOfWeek;
-            if (d1 < d2)
+            if (gmt == null)
             {
-                var result = d1 <= weekOfToday && weekOfToday <= d2;
-                debugOutput.AppendLine($"[INFO] weekdayRange(wd1:{wd1}, wd2:{wd2}, gmt:{gmt}) => {result}");
-                return result;
+                var weekOfToday = DateTime.Now.DayOfWeek;
+                if (d1 < d2)
+                {
+                    result = d1 <= weekOfToday && weekOfToday <= d2;
+                    debugOutput.AppendLine($"[INFO] weekdayRange(wd1:{wd1}, wd2:{wd2}) => {result}");
+                    return result;
+                }
+                else
+                {
+                    debugOutput.AppendLine($"[WARNING] weekdayRange(wd1:{wd1}, wd2:{wd2}) => wd1 >= wd2");
+                    result = weekOfToday == d1 || weekOfToday == d2;
+                    debugOutput.AppendLine($"[INFO] weekdayRange(wd1:{wd1}, wd2:{wd2}) => {result}");
+                    return result;
+                }
             }
             else
             {
-                debugOutput.AppendLine($"[WARNING] weekdayRange(wd1:{wd1}, wd2:{wd2}) => wd1 >= wd2");
-                var result = weekOfToday == d1 || weekOfToday == d2;
-                debugOutput.AppendLine($"[INFO] weekdayRange(wd1:{wd1}, wd2:{wd2}, gmt:{gmt}) => {result}");
-                return result;
+                var weekOfToday = DateTime.UtcNow.DayOfWeek;
+                if (d1 < d2)
+                {
+                    result = d1 <= weekOfToday && weekOfToday <= d2;
+                    debugOutput.AppendLine($"[INFO] weekdayRange(wd1:{wd1}, wd2:{wd2}, gmt:{gmt}) => {result}");
+                    return result;
+                }
+                else
+                {
+                    debugOutput.AppendLine($"[WARNING] weekdayRange(wd1:{wd1}, wd2:{wd2}) => wd1 >= wd2");
+                    result = weekOfToday == d1 || weekOfToday == d2;
+                    debugOutput.AppendLine($"[INFO] weekdayRange(wd1:{wd1}, wd2:{wd2}, gmt:{gmt}) => {result}");
+                    return result;
+                }
             }
         }
 
