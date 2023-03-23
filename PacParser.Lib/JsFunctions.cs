@@ -19,6 +19,7 @@ namespace PacParser.Lib
         public string JsConsole => jsConsole.ToString();
 
         public string Host = string.Empty;
+        public IPAddress MyIpAddress = IPAddress.Loopback;
 
         public void ClearDebug() { debugOutput.Clear(); }
         public void ClearConsole() { jsConsole.Clear(); }
@@ -158,7 +159,7 @@ namespace PacParser.Lib
             {
                 var remoteAddr = Dns.GetHostEntry(Host, AddressFamily.InterNetwork).AddressList.First();
                 var remoteEndPoint = new IPEndPoint(remoteAddr, 0);
-                var result = Helper.RouteQuery(remoteEndPoint).ToString();
+                var result = Helper.GetMyIpAddress(remoteEndPoint).ToString();
                 debugOutput.AppendLine($"[INFO] myIpAddress() => {result}");
                 return result;
             }
@@ -168,10 +169,17 @@ namespace PacParser.Lib
                 debugOutput.AppendLine($"[WARNING] myIpAddress() => Failing back to remote address 13.107.4.52");
                 var remoteAddr = new IPAddress(new byte[] { 13, 107, 4, 52 });
                 var remoteEndPoint = new IPEndPoint(remoteAddr, 0);
-                var result = Helper.RouteQuery(remoteEndPoint).ToString();
+                var result = Helper.GetMyIpAddress(remoteEndPoint).ToString();
                 debugOutput.AppendLine($"[INFO] myIpAddress() => {result}");
                 return result;
             }
+        }
+
+        public string myIpAddressOverride()
+        {
+            var result = MyIpAddress.ToString();
+            debugOutput.AppendLine($"[INFO] myIpAddress() => {result} (Overridden)");
+            return result;
         }
 
         public int dnsDomainLevels(string host)

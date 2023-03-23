@@ -1,4 +1,5 @@
 ﻿using Jint;
+using System.Net;
 
 namespace PacParser.Lib
 {
@@ -21,7 +22,6 @@ namespace PacParser.Lib
                     .SetValue("isResolvable", new Func<string, bool>(jsFunctions.isResolvable))
                     .SetValue("shExpMatch", new Func<string, string, bool>(jsFunctions.shExpMatch))
                     .SetValue("localHostOrDomainIs", new Func<string, string, bool>(jsFunctions.localHostOrDomainIs))
-                    .SetValue("myIpAddress", new Func<string>(jsFunctions.myIpAddress))
                     .SetValue("convert_addr", new Func<string, uint>(jsFunctions.convert_addr))
                     .SetValue("dnsDomainLevels", new Func<string, int>(jsFunctions.dnsDomainLevels))
                     .SetValue("weekdayRange", new Func<string, string, string, bool>(jsFunctions.weekdayRange))
@@ -30,11 +30,24 @@ namespace PacParser.Lib
                     .SetValue("alert", new Action<string>(jsFunctions.alert));
         }
 
-        public void Parse(string PAC, string Url, string Host)
+        public void Parse(string PAC, string Url, string Host) 
         {
             jsFunctions.ClearConsole();
             jsFunctions.ClearDebug();
             jsFunctions.Host = Host;
+            engine.SetValue("myIpAddress", new Func<string>(jsFunctions.myIpAddress));
+            engine.Execute(PAC);
+            engine.Execute($"alert(FindProxyForURL('{Url}', '{Host}'));");
+        }
+
+        // Allows caller override myIpAddress
+        public void Parse(string PAC, string Url, string Host, IPAddress MyIpAddress)
+        {
+            jsFunctions.ClearConsole();
+            jsFunctions.ClearDebug();
+            jsFunctions.Host = Host;
+            jsFunctions.MyIpAddress = MyIpAddress;
+            engine.SetValue("myIpAddress", new Func<string>(jsFunctions.myIpAddressOverride));
             engine.Execute(PAC);
             engine.Execute($"alert(FindProxyForURL('{Url}', '{Host}'));");
         }

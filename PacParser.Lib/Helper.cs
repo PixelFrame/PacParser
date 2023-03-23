@@ -1,11 +1,25 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace PacParser.Lib
 {
     internal static class Helper
     {
-        public static IPAddress RouteQuery(IPEndPoint remoteEndPoint)
+        public static IPAddress GetMyIpAddress(IPEndPoint remoteEndPoint)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return RouteQueryWindows(remoteEndPoint);
+            }
+            else
+            {
+                return System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0].GetIPProperties().UnicastAddresses[0].Address;
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Calling platform checked")]
+        private static IPAddress RouteQueryWindows(IPEndPoint remoteEndPoint)
         {
             var sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             var sockAddr = remoteEndPoint.Serialize();
